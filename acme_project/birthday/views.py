@@ -1,13 +1,16 @@
 # birthday/views.py
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 
 from .forms import BirthdayForm
 from .models import Birthday
 from .utils import calculate_birthday_countdown
 
 
-def birthday(request):
-    form = BirthdayForm(request.POST or None)
+def birthday(request, pk=None):
+    instance = None
+    if pk:
+        instance = get_object_or_404(Birthday, pk=pk)
+    form = BirthdayForm(request.POST or None, instance=instance)
     context = {'form': form}
     if form.is_valid():
         form.save()
@@ -21,3 +24,12 @@ def birthday_list(request):
     birthdays = Birthday.objects.all()
     context = {'birthdays': birthdays}
     return render(request, 'birthday/birthday_list.html', context)
+
+def delete_birthday(request, pk):
+    instance = get_object_or_404(Birthday, pk=pk)
+    form = BirthdayForm(instance=instance)
+    if request.method == 'POST':
+        instance.delete()
+        return redirect('birthday:list')
+    context = {'form': form}
+    return render(request, 'birthday/birthday.html', context)

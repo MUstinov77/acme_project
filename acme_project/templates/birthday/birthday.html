@@ -2,19 +2,31 @@
 {% load django_bootstrap5 %}
 
 {% block content %}
+  {% if '/edit/' in request.path %}
+    <h1>Редактирование записи</h1>
+  {% elif '/delete/' in request.path %}
+    <h1>Удаление записи</h1>
+  {% else %}
+    <h1>Добавить запись</h1>
+  {% endif %}
   <div class="card col-4">
     <div class="card-header">
       Калькулятор ожидания дня рождения
     </div>
     <div class="card-body">
       <form method="post">
+        {% with form.instance as data %}
         {% csrf_token %}
-        {% bootstrap_form form %}
+        {% if not '/delete/' in request.path %}
+          {% bootstrap_form form %}
+        {% else %}
+          <p>{{ data.first_name }} {{ data.last_name }}</p>
+          <p>{{ data.birthday }}</p>
+        {% endif %}
         {% bootstrap_button button_type="submit" content="Отправить" %}
       </form>
     </div>
   </div>
-  {% with form.instance as data %}
     {% if form.is_valid %}
       ID новой записи в БД: {{ data.id }}
       <hr>
