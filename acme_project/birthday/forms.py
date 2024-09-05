@@ -10,5 +10,9 @@ class BirthdayForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'birthday': forms.DateInput(
-                attrs={'type': 'date'})
+                attrs={'type': 'date'},
+            )
         }
+
+    def clean_first_name(self):
+        return self.cleaned_data['first_name'].split()[0]
