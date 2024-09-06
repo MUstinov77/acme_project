@@ -1,43 +1,42 @@
-# birthday/views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from django.core.paginator import Paginator
+from django.urls import reverse_lazy
+from django.views.generic import (
+    ListView, CreateView, UpdateView, DeleteView, DetailView
+)
 
 from .forms import BirthdayForm
 from .models import Birthday
 from .utils import calculate_birthday_countdown
 
 
-def birthday(request, pk=None):
-    instance = None
-    if pk:
-        instance = get_object_or_404(Birthday, pk=pk)
-    form = BirthdayForm(
-        request.POST or None,
-        files=request.FILES or None,
-        instance=instance
-    )
-    context = {'form': form}
-    if form.is_valid():
-        form.save()
-        birthday_countdown = calculate_birthday_countdown(
-            form.cleaned_data['birthday']
+class BirthdayMixin:
+    model = Birthday
+    form_class = BirthdayForm
+
+
+class BirthdayCreateView(BirthdayMixin, CreateView):
+    pass
+
+
+class BirthdayUpdateView(BirthdayMixin, UpdateView):
+    pass
+
+
+class BirthdayDetailView(DetailView):
+    model = Birthday
+    template_name_suffix = '_detail'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['birthday_countdown'] = calculate_birthday_countdown(
+            self.object.birthday
         )
-        context.update({'birthday_countdown': birthday_countdown})
-    return render(request, 'birthday/birthday.html', context)
+        return context
+class BirthdayListView(ListView):
+    model = Birthday
+    ordering = 'id'
+    paginate_by = 10
 
-def birthday_list(request):
-    birthdays = Birthday.objects.order_by('id')
-    paginator = Paginator(birthdays, 10)
-    page_number = request.GET.get('page')
-    page_object = paginator.get_page(page_number)
-    context = {'page_object': page_object}
-    return render(request, 'birthday/birthday_list.html', context)
 
-def delete_birthday(request, pk):
-    instance = get_object_or_404(Birthday, pk=pk)
-    form = BirthdayForm(instance=instance)
-    if request.method == 'POST':
-        instance.delete()
-        return redirect('birthday:list')
-    context = {'form': form}
-    return render(request, 'birthday/birthday.html', context)
+class BirthdayDeleteView(DeleteView):
+    model = Birthday
+    success_url = reverse_lazy('birthday:list')
