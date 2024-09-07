@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from django.conf.global_settings import MEDIA_ROOT, EMAIL_BACKEND
+from django.conf.global_settings import MEDIA_ROOT, EMAIL_BACKEND, LOGIN_REDIRECT_URL
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -87,6 +87,8 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+
+LOGIN_REDIRECT_URL = 'pages:homepage'
 
 EMAIL_BACKEND = 'django.core.email.backends.filebased.EmailBackend'
 
