@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from django.conf.global_settings import MEDIA_ROOT
+from django.conf.global_settings import MEDIA_ROOT, EMAIL_BACKEND
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -87,6 +87,10 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+
+EMAIL_BACKEND = 'django.core.email.backends.filebased.EmailBackend'
+
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 
 MEDIA_ROOT = BASE_DIR / 'media'
 
