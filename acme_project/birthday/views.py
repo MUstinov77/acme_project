@@ -2,7 +2,10 @@ from django.urls import reverse_lazy
 from django.views.generic import (
     ListView, CreateView, UpdateView, DeleteView, DetailView
 )
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import (
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+)
 
 from .forms import BirthdayForm
 from .models import Birthday
@@ -14,12 +17,25 @@ class BirthdayMixin(LoginRequiredMixin):
     form_class = BirthdayForm
 
 
+class OnlyAuthorMixin(UserPassesTestMixin):
+
+    def test_func(self):
+        object = self.get_object()
+        return object.author == self.request.user
+
 class BirthdayCreateView(BirthdayMixin, CreateView):
-    pass
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
 
 
-class BirthdayUpdateView(BirthdayMixin, UpdateView):
-    pass
+
+class BirthdayUpdateView(
+    OnlyAuthorMixin,
+    UpdateView
+):
+    model = Birthday
+    form_class = BirthdayForm
 
 
 class BirthdayDetailView(DetailView):
